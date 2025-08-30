@@ -43,10 +43,17 @@
         /* Game container */
         #game-container {
             width: 100%;
-            height: calc(100vh - 100px);
+            height: calc(100dvh - 100px);
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        
+        /* Fallback for browsers that don't support dvh */
+        @supports not (height: 100dvh) {
+            #game-container {
+                height: calc(100vh - 160px);
+            }
         }
 
         /* Landscape orientation enforcement */
@@ -96,10 +103,60 @@
         canvas {
             max-width: 100% !important;
             max-height: 100% !important;
+            width: 100% !important;
+            height: auto !important;
             object-fit: contain;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
+        }
+        
+        /* Mobile-specific adjustments */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            #banner {
+                height: 60px;
+                margin-bottom: 5px;
+            }
+            
+            #banner-canvas {
+                height: 60px;
+            }
+            
+            #game-container {
+                height: calc(100dvh - 80px);
+            }
+            
+            @supports not (height: 100dvh) {
+                #game-container {
+                    height: calc(100vh - 140px);
+                }
+            }
+        }
+        
+        /* Extra small screens */
+        @media screen and (max-height: 500px) {
+            #banner {
+                height: 40px;
+                margin-bottom: 5px;
+            }
+            
+            #banner-canvas {
+                height: 40px;
+            }
+            
+            #game-container {
+                height: calc(100dvh - 55px);
+            }
+            
+            @supports not (height: 100dvh) {
+                #game-container {
+                    height: calc(100vh - 115px);
+                }
+            }
         }
     </style>
 </head>
@@ -122,9 +179,20 @@
             const canvas = document.getElementById('banner-canvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas size
-            canvas.width = 600;
-            canvas.height = 80;
+            // Set canvas size based on screen size
+            const isMobile = window.innerWidth <= 768;
+            const isSmall = window.innerHeight <= 500;
+            
+            if (isSmall) {
+                canvas.width = 400;
+                canvas.height = 40;
+            } else if (isMobile) {
+                canvas.width = 500;
+                canvas.height = 60;
+            } else {
+                canvas.width = 600;
+                canvas.height = 80;
+            }
             
             // Amazon forest colors
             const darkGreen = '#2D5016';
@@ -133,47 +201,67 @@
             const yellow = '#FFD700';
             const white = '#FFFFFF';
             
+            const w = canvas.width;
+            const h = canvas.height;
+            const centerX = w / 2;
+            const centerY = h / 2;
+            
             // Background
             ctx.fillStyle = darkGreen;
-            ctx.fillRect(0, 0, 600, 80);
+            ctx.fillRect(0, 0, w, h);
             
             // Title background
+            const bgPadding = w * 0.083; // 50/600 ratio
+            const bgHeight = h * 0.625; // 50/80 ratio
+            const bgY = h * 0.1875; // 15/80 ratio
+            
             ctx.fillStyle = brown;
-            ctx.fillRect(50, 15, 500, 50);
+            ctx.fillRect(bgPadding, bgY, w - (bgPadding * 2), bgHeight);
             
             // Title border
+            const borderPadding = bgPadding - 5;
+            const borderHeight = h * 0.75; // 60/80 ratio
+            const borderY = h * 0.125; // 10/80 ratio
+            
             ctx.fillStyle = lightGreen;
-            ctx.fillRect(45, 10, 510, 60);
+            ctx.fillRect(borderPadding, borderY, w - (borderPadding * 2), borderHeight);
             ctx.fillStyle = brown;
-            ctx.fillRect(50, 15, 500, 50);
+            ctx.fillRect(bgPadding, bgY, w - (bgPadding * 2), bgHeight);
             
             // Set up pixel font style
             ctx.imageSmoothingEnabled = false;
-            ctx.font = 'bold 24px Courier New, monospace';
+            const titleSize = Math.max(12, h * 0.3);
+            const creditSize = Math.max(8, h * 0.2);
+            
+            ctx.font = `bold ${titleSize}px Courier New, monospace`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
             // Title shadow
             ctx.fillStyle = darkGreen;
-            ctx.fillText('CAPYBARA DASH', 302, 42);
+            ctx.fillText('CAPYBARA DASH', centerX + 2, centerY - h * 0.05);
             
             // Main title
             ctx.fillStyle = yellow;
-            ctx.fillText('CAPYBARA DASH', 300, 40);
+            ctx.fillText('CAPYBARA DASH', centerX, centerY - h * 0.075);
             
             // "by Bennet" text
-            ctx.font = 'bold 16px Courier New, monospace';
+            ctx.font = `bold ${creditSize}px Courier New, monospace`;
             ctx.fillStyle = white;
-            ctx.fillText('by Bennet', 300, 58);
+            ctx.fillText('by Bennet', centerX, centerY + h * 0.225);
             
-            // Decorative elements
-            ctx.fillStyle = lightGreen;
-            // Left decoration
-            ctx.fillRect(20, 30, 15, 20);
-            ctx.fillRect(25, 25, 5, 30);
-            // Right decoration  
-            ctx.fillRect(565, 30, 15, 20);
-            ctx.fillRect(570, 25, 5, 30);
+            // Decorative elements (only if there's enough space)
+            if (w >= 400) {
+                ctx.fillStyle = lightGreen;
+                const decorSize = h * 0.25;
+                const decorY = centerY - decorSize/2;
+                // Left decoration
+                ctx.fillRect(w * 0.033, decorY, decorSize * 0.75, decorSize);
+                ctx.fillRect(w * 0.042, decorY - decorSize * 0.25, decorSize * 0.25, decorSize * 1.5);
+                // Right decoration  
+                ctx.fillRect(w * 0.942, decorY, decorSize * 0.75, decorSize);
+                ctx.fillRect(w * 0.95, decorY - decorSize * 0.25, decorSize * 0.25, decorSize * 1.5);
+            }
         }
         
         // Create banner when page loads
