@@ -292,6 +292,44 @@
         
         // Create banner when page loads
         document.addEventListener('DOMContentLoaded', createBanner);
+        
+        // Enhanced orientation detection for Samsung and other Android devices
+        function checkOrientation() {
+            const gameContainer = document.getElementById('game-container');
+            const banner = document.getElementById('banner');
+            const rotateMessage = document.getElementById('rotate-message');
+            
+            // Multiple methods to detect portrait orientation
+            const isPortrait = 
+                // Method 1: CSS orientation (works on most devices)
+                window.matchMedia('(orientation: portrait)').matches ||
+                // Method 2: Screen dimensions (fallback for Samsung)
+                window.innerHeight > window.innerWidth ||
+                // Method 3: Screen object orientation (if available)
+                (screen.orientation && screen.orientation.angle % 180 === 0 && window.innerHeight > window.innerWidth) ||
+                // Method 4: Legacy orientation API
+                (window.orientation !== undefined && (window.orientation === 0 || window.orientation === 180) && window.innerHeight > window.innerWidth);
+            
+            if (isPortrait) {
+                gameContainer.style.display = 'none';
+                banner.style.display = 'none';
+                rotateMessage.style.display = 'flex';
+            } else {
+                gameContainer.style.display = 'flex';
+                banner.style.display = 'flex';
+                rotateMessage.style.display = 'none';
+            }
+        }
+        
+        // Check orientation on load and resize
+        window.addEventListener('load', checkOrientation);
+        window.addEventListener('resize', checkOrientation);
+        window.addEventListener('orientationchange', checkOrientation);
+        
+        // For devices that support the modern Screen Orientation API
+        if (screen.orientation) {
+            screen.orientation.addEventListener('change', checkOrientation);
+        }
     </script>
     <script type="module" src="/src/main.ts"></script>
 </body>

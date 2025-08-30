@@ -269,7 +269,7 @@ export class GameScene extends Phaser.Scene {
             case 'branch':
                 // Low branch - must crouch under (scaled up)
                 obstacle = this.obstacles.create(1250, 230, 'spikeBranch');
-                obstacle.setSize(80, 40);
+                obstacle.setSize(60, 25);  // Reduced hitbox size for easier jumping
                 visual = obstacle as any; // Use the sprite as visual
                 break;
             case 'river':
