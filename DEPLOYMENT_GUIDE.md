@@ -33,8 +33,7 @@
 2. **Enable GitHub Pages:**
    - Go to your repository on GitHub
    - Navigate to Settings → Pages
-   - Select "Deploy from a branch"
-   - Choose `gh-pages` branch
+   - Under "Source", select "GitHub Actions"
    - Click Save
 
 3. **Wait for deployment:**
@@ -61,10 +60,8 @@
 
 ### GitHub Pages Settings
 1. Go to **Settings** → **Pages**
-2. Set **Source** to "Deploy from a branch"
-3. Select **Branch**: `gh-pages`
-4. Select **Folder**: `/ (root)`
-5. Click **Save**
+2. Set **Source** to "GitHub Actions"
+3. Click **Save**
 
 ### Actions Permissions (if needed)
 1. Go to **Settings** → **Actions** → **General**
