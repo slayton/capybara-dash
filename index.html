@@ -3,26 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="orientation" content="landscape">
     <title>Capybara Dash</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             margin: 0;
-            padding: 0;
+            padding: 10px;
+            background: linear-gradient(135deg, #2D5016 0%, #4A7C59 50%, #6B8E23 100%);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        /* Banner */
+        #banner {
+            width: 100%;
+            height: 80px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-family: Arial, sans-serif;
         }
+
+        #banner-canvas {
+            max-width: 100%;
+            height: 80px;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        /* Game container */
         #game-container {
-            border: 3px solid #333;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            width: 100%;
+            height: calc(100vh - 100px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Landscape orientation enforcement */
+        @media screen and (orientation: portrait) {
+            #game-container {
+                display: none;
+            }
+            
+            #banner {
+                display: none;
+            }
+            
+            #rotate-message {
+                display: flex !important;
+            }
+        }
+
+        #rotate-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #2D5016;
+            color: white;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            font-size: 24px;
+            z-index: 9999;
+        }
+
+        #rotate-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite linear;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Game canvas scaling */
+        canvas {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            object-fit: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
         }
     </style>
 </head>
 <body>
+    <div id="rotate-message">
+        <div id="rotate-icon">📱</div>
+        <div>Please rotate your device to landscape mode</div>
+        <div style="font-size: 18px; margin-top: 10px; opacity: 0.8;">🔄 Turn your phone sideways to play</div>
+    </div>
+    
+    <div id="banner">
+        <canvas id="banner-canvas"></canvas>
+    </div>
+    
     <div id="game-container"></div>
+    
+    <script>
+        // Create pixel art banner
+        function createBanner() {
+            const canvas = document.getElementById('banner-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            canvas.width = 600;
+            canvas.height = 80;
+            
+            // Amazon forest colors
+            const darkGreen = '#2D5016';
+            const lightGreen = '#4A7C59';
+            const brown = '#8B4513';
+            const yellow = '#FFD700';
+            const white = '#FFFFFF';
+            
+            // Background
+            ctx.fillStyle = darkGreen;
+            ctx.fillRect(0, 0, 600, 80);
+            
+            // Title background
+            ctx.fillStyle = brown;
+            ctx.fillRect(50, 15, 500, 50);
+            
+            // Title border
+            ctx.fillStyle = lightGreen;
+            ctx.fillRect(45, 10, 510, 60);
+            ctx.fillStyle = brown;
+            ctx.fillRect(50, 15, 500, 50);
+            
+            // Set up pixel font style
+            ctx.imageSmoothingEnabled = false;
+            ctx.font = 'bold 24px Courier New, monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // Title shadow
+            ctx.fillStyle = darkGreen;
+            ctx.fillText('CAPYBARA DASH', 302, 42);
+            
+            // Main title
+            ctx.fillStyle = yellow;
+            ctx.fillText('CAPYBARA DASH', 300, 40);
+            
+            // "by Bennet" text
+            ctx.font = 'bold 16px Courier New, monospace';
+            ctx.fillStyle = white;
+            ctx.fillText('by Bennet', 300, 58);
+            
+            // Decorative elements
+            ctx.fillStyle = lightGreen;
+            // Left decoration
+            ctx.fillRect(20, 30, 15, 20);
+            ctx.fillRect(25, 25, 5, 30);
+            // Right decoration  
+            ctx.fillRect(565, 30, 15, 20);
+            ctx.fillRect(570, 25, 5, 30);
+        }
+        
+        // Create banner when page loads
+        document.addEventListener('DOMContentLoaded', createBanner);
+    </script>
     <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

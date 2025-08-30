@@ -18,7 +18,22 @@ const config: Phaser.Types.Core.GameConfig = {
     scene: [GameScene, GameOverScene],
     scale: {
         mode: Phaser.Scale.FIT,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+        width: 1200,
+        height: 400,
+        min: {
+            width: 600,
+            height: 200
+        },
+        max: {
+            width: 2400,
+            height: 800
+        }
+    },
+    render: {
+        pixelArt: true,
+        antialias: false,
+        roundPixels: true
     }
 };
 
