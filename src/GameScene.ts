@@ -93,32 +93,52 @@ export class GameScene extends Phaser.Scene {
     setupTouchControls() {
         let startY = 0;
         let startTime = 0;
+        let touchStarted = false;
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             startY = pointer.y;
             startTime = this.time.now;
+            touchStarted = true;
+            console.log('Touch started at:', startY);
         });
 
         this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
+            if (!touchStarted) return;
+            
             const swipeDistance = pointer.y - startY;
             const swipeTime = this.time.now - startTime;
+            
+            console.log(`Touch ended: distance=${swipeDistance}, time=${swipeTime}`);
 
-            if (swipeDistance > 50 && swipeTime < 500) {
-                // Swipe down - crouch
-                this.addKeyPress('SWIPE DOWN');
-                this.handleCrouch(true);
-            } else {
-                // Tap - jump
+            if (Math.abs(swipeDistance) > 30 && swipeTime < 800) {
+                if (swipeDistance > 30) {
+                    // Swipe down - crouch
+                    console.log('Swipe down detected - crouching');
+                    this.addKeyPress('SWIPE DOWN');
+                    this.handleCrouch(true);
+                    
+                    // Release crouch after a moment
+                    this.time.delayedCall(600, () => {
+                        console.log('Auto-releasing crouch');
+                        this.handleCrouch(false);
+                    });
+                } else {
+                    // Swipe up - could be used for something else later
+                    console.log('Swipe up detected');
+                }
+            } else if (swipeTime < 300 && Math.abs(swipeDistance) < 20) {
+                // Quick tap with minimal movement - jump
+                console.log('Tap detected - jumping');
                 this.addKeyPress('TAP');
                 this.handleJump();
             }
             
-            // Release crouch after a moment
-            if (this.isCrouching) {
-                this.time.delayedCall(500, () => {
-                    this.handleCrouch(false);
-                });
-            }
+            touchStarted = false;
+        });
+
+        // Handle pointer cancel (when user drags off screen)
+        this.input.on('pointercancel', () => {
+            touchStarted = false;
         });
     }
 
