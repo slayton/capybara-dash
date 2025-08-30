@@ -79,13 +79,15 @@ export class GameScene extends Phaser.Scene {
             color: '#000' 
         });
 
-        // Create diagnostic text - compact version
-        this.diagnosticText = this.add.text(16, 50, 'Debug: Ready', {
-            fontSize: '14px',
-            color: '#FF0000',
-            backgroundColor: '#FFFFFF88',
-            padding: { x: 3, y: 3 }
-        });
+        // Create diagnostic text - compact version (only on localhost)
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            this.diagnosticText = this.add.text(16, 50, 'Debug: Ready', {
+                fontSize: '14px',
+                color: '#FF0000',
+                backgroundColor: '#FFFFFF88',
+                padding: { x: 3, y: 3 }
+            });
+        }
 
         // Jump count will be reset in update loop when on ground
     }
@@ -318,9 +320,11 @@ export class GameScene extends Phaser.Scene {
     }
 
     updateDiagnostics(body: Phaser.Physics.Arcade.Body) {
-        const keys = this.keyPressHistory.length > 0 ? this.keyPressHistory.join(' ') : 'None';
-        const diagnostic = `Jumps: ${this.jumpCount} | Ground: ${body.onFloor() ? 'Y' : 'N'} | Crouch: ${this.isCrouching ? 'Y' : 'N'} | Keys: ${keys}`;
-        this.diagnosticText.setText(diagnostic);
+        if (this.diagnosticText) {
+            const keys = this.keyPressHistory.length > 0 ? this.keyPressHistory.join(' ') : 'None';
+            const diagnostic = `Jumps: ${this.jumpCount} | Ground: ${body.onFloor() ? 'Y' : 'N'} | Crouch: ${this.isCrouching ? 'Y' : 'N'} | Keys: ${keys}`;
+            this.diagnosticText.setText(diagnostic);
+        }
     }
 
     createCapybaraTexture() {
