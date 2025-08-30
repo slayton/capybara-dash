@@ -4,7 +4,7 @@ export class GameScene extends Phaser.Scene {
     private player!: Phaser.Physics.Arcade.Sprite;
     private obstacles!: Phaser.Physics.Arcade.Group;
     private ground!: Phaser.Physics.Arcade.StaticGroup;
-    private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+    // private cursors!: Phaser.Types.Input.Keyboard.CursorKeys; // Unused
     private jumpKey!: Phaser.Input.Keyboard.Key;
     private crouchKey!: Phaser.Input.Keyboard.Key;
     private score: number = 0;
@@ -51,7 +51,7 @@ export class GameScene extends Phaser.Scene {
         // Create player with capybara texture
         this.player = this.physics.add.sprite(playerX, 250, 'capybara');
         this.player.setSize(this.playerWidth, this.playerNormalHeight);
-        this.playerVisual = this.player; // Use the sprite as the visual
+        this.playerVisual = this.player as any; // Use the sprite as the visual
 
         // Set up physics for player
         this.player.setBounce(0);
@@ -67,7 +67,6 @@ export class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.obstacles, this.hitObstacle, undefined, this);
 
         // Set up keyboard controls
-        this.cursors = this.input.keyboard!.createCursorKeys();
         this.jumpKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A);
         this.crouchKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S);
 
@@ -206,8 +205,9 @@ export class GameScene extends Phaser.Scene {
             const obs = obstacle as Phaser.Physics.Arcade.Sprite;
             
             // Move obstacle horizontally only by setting velocity
-            obs.body!.setVelocityX(-this.gameSpeed);
-            obs.body!.setVelocityY(0);
+            const obsBody = obs.body as Phaser.Physics.Arcade.Body;
+            obsBody.setVelocityX(-this.gameSpeed);
+            obsBody.setVelocityY(0);
             
             // Update obstacle visual position (if it's a separate visual)
             const obsVisual = obs.getData('visual');
@@ -242,19 +242,19 @@ export class GameScene extends Phaser.Scene {
                 // Fallen tree - must jump over (scaled up)
                 obstacle = this.obstacles.create(1250, 270, 'fallenLog');
                 obstacle.setSize(80, 60);
-                visual = obstacle; // Use the sprite as visual
+                visual = obstacle as any; // Use the sprite as visual
                 break;
             case 'branch':
                 // Low branch - must crouch under (scaled up)
                 obstacle = this.obstacles.create(1250, 230, 'spikeBranch');
                 obstacle.setSize(80, 40);
-                visual = obstacle; // Use the sprite as visual
+                visual = obstacle as any; // Use the sprite as visual
                 break;
             case 'river':
                 // River with crocodiles - must jump over (extended to bottom, same hitbox height as tree)
                 obstacle = this.obstacles.create(1250, 280, 'river');
                 obstacle.setSize(120, 60); // Same height as tree log
-                visual = obstacle; // Use the sprite as visual
+                visual = obstacle as any; // Use the sprite as visual
                 break;
             default:
                 return;
@@ -262,10 +262,11 @@ export class GameScene extends Phaser.Scene {
         
         obstacle.setData('visual', visual);
         obstacle.setData('type', type);
-        obstacle.body!.setImmovable(true);
+        const obstacleBody = obstacle.body as Phaser.Physics.Arcade.Body;
+        obstacleBody.setImmovable(true);
     }
 
-    hitObstacle(player: any, obstacle: any) {
+    hitObstacle(_player: any, obstacle: any) {
         const obstacleType = obstacle.getData('type');
         const body = this.player.body as Phaser.Physics.Arcade.Body;
         
@@ -309,7 +310,8 @@ export class GameScene extends Phaser.Scene {
             this.textures.remove('capybara');
         }
         const canvas = this.textures.createCanvas('capybara', 60, 80);
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas?.getContext();
+        if (!ctx) return;
         
         // Realistic capybara colors
         const brown = '#8B6F47';      // Main body
@@ -360,7 +362,7 @@ export class GameScene extends Phaser.Scene {
         this.drawPixelRect(ctx, 50, 32, 2, 26, brown);
         this.drawPixelRect(ctx, 52, 35, 2, 20, lightBrown);
         
-        canvas.refresh();
+        canvas?.refresh();
     }
 
     createFallenLogTexture() {
@@ -369,7 +371,8 @@ export class GameScene extends Phaser.Scene {
             this.textures.remove('fallenLog');
         }
         const canvas = this.textures.createCanvas('fallenLog', 80, 60);
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas?.getContext();
+        if (!ctx) return;
         
         // Amazon forest log colors
         const darkBrown = '#654321';    // Main log color
@@ -410,7 +413,7 @@ export class GameScene extends Phaser.Scene {
         this.drawPixelRect(ctx, 25, 8, 4, 6, veryDarkBrown);
         this.drawPixelRect(ctx, 45, 50, 6, 4, veryDarkBrown);
         
-        canvas.refresh();
+        canvas?.refresh();
     }
 
     createRiverTexture() {
@@ -419,7 +422,8 @@ export class GameScene extends Phaser.Scene {
             this.textures.remove('river');
         }
         const canvas = this.textures.createCanvas('river', 120, 80);
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas?.getContext();
+        if (!ctx) return;
         
         // Amazon river colors
         const darkBlue = '#1E3A8A';     // Deep water
@@ -481,7 +485,7 @@ export class GameScene extends Phaser.Scene {
         this.drawPixelRect(ctx, 48, 38, 2, 2, yellow); // Just eyes showing
         this.drawPixelRect(ctx, 52, 38, 2, 2, yellow);
         
-        canvas.refresh();
+        canvas?.refresh();
     }
 
     createBranchTexture() {
@@ -490,7 +494,8 @@ export class GameScene extends Phaser.Scene {
             this.textures.remove('spikeBranch');
         }
         const canvas = this.textures.createCanvas('spikeBranch', 80, 40);
-        const ctx = canvas.getContext('2d');
+        const ctx = canvas?.getContext();
+        if (!ctx) return;
         
         // Amazon branch colors
         const brown = '#92400E';        // Branch
@@ -534,7 +539,7 @@ export class GameScene extends Phaser.Scene {
         this.drawPixelRect(ctx, 55, 26, 2, 6, darkBrown);
         this.drawPixelRect(ctx, 68, 26, 2, 8, darkBrown);
         
-        canvas.refresh();
+        canvas?.refresh();
     }
     
     drawPixelRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, color: string) {

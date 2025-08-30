@@ -29,7 +29,7 @@ export class GameOverScene extends Phaser.Scene {
 
         // Restart button
         const restartButton = this.add.rectangle(centerX, 300, 200, 50, 0x4CAF50);
-        const restartText = this.add.text(centerX, 300, 'PLAY AGAIN', {
+        this.add.text(centerX, 300, 'PLAY AGAIN', {
             fontSize: '24px',
             color: '#ffffff'
         }).setOrigin(0.5);
