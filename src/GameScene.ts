@@ -96,12 +96,32 @@ export class GameScene extends Phaser.Scene {
         let startY = 0;
         let startTime = 0;
         let touchStarted = false;
+        let isDragging = false;
 
         this.input.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
             startY = pointer.y;
             startTime = this.time.now;
             touchStarted = true;
-            console.log('Touch started at:', startY);
+            isDragging = false;
+        });
+
+        // Track pointer movement for better iOS swipe detection
+        this.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+            if (!touchStarted || isDragging) return;
+            
+            const currentDistance = pointer.y - startY;
+            
+            // Detect swipe down during movement (more responsive for iOS)
+            if (currentDistance > 20) {  // Lower threshold for better iOS detection
+                isDragging = true;
+                this.addKeyPress('SWIPE DOWN');
+                this.handleCrouch(true);
+                
+                // Release crouch after a moment
+                this.time.delayedCall(600, () => {
+                    this.handleCrouch(false);
+                });
+            }
         });
 
         this.input.on('pointerup', (pointer: Phaser.Input.Pointer) => {
@@ -109,38 +129,34 @@ export class GameScene extends Phaser.Scene {
             
             const swipeDistance = pointer.y - startY;
             const swipeTime = this.time.now - startTime;
-            
-            console.log(`Touch ended: distance=${swipeDistance}, time=${swipeTime}`);
 
-            if (Math.abs(swipeDistance) > 30 && swipeTime < 800) {
-                if (swipeDistance > 30) {
-                    // Swipe down - crouch
-                    console.log('Swipe down detected - crouching');
-                    this.addKeyPress('SWIPE DOWN');
-                    this.handleCrouch(true);
-                    
-                    // Release crouch after a moment
-                    this.time.delayedCall(600, () => {
-                        console.log('Auto-releasing crouch');
-                        this.handleCrouch(false);
-                    });
-                } else {
-                    // Swipe up - could be used for something else later
-                    console.log('Swipe up detected');
+            // Only process tap if we haven't already processed a swipe
+            if (!isDragging) {
+                if (Math.abs(swipeDistance) > 20 && swipeTime < 800) {  // Lower threshold
+                    if (swipeDistance > 20) {
+                        // Swipe down - crouch (backup detection on release)
+                        this.addKeyPress('SWIPE DOWN');
+                        this.handleCrouch(true);
+                        
+                        this.time.delayedCall(600, () => {
+                            this.handleCrouch(false);
+                        });
+                    }
+                } else if (swipeTime < 300 && Math.abs(swipeDistance) < 15) {
+                    // Quick tap with minimal movement - jump
+                    this.addKeyPress('TAP');
+                    this.handleJump();
                 }
-            } else if (swipeTime < 300 && Math.abs(swipeDistance) < 20) {
-                // Quick tap with minimal movement - jump
-                console.log('Tap detected - jumping');
-                this.addKeyPress('TAP');
-                this.handleJump();
             }
             
             touchStarted = false;
+            isDragging = false;
         });
 
         // Handle pointer cancel (when user drags off screen)
         this.input.on('pointercancel', () => {
             touchStarted = false;
+            isDragging = false;
         });
     }
 
@@ -328,7 +344,7 @@ export class GameScene extends Phaser.Scene {
     }
 
     createCapybaraTexture() {
-        // Create a 60x80 pixel art capybara - PROPER SIDE PROFILE FACING RIGHT
+        // Create a 60x80 pixel art capybara - SIDE PROFILE FACING LEFT
         // Check if texture already exists, if so, destroy it first
         if (this.textures.exists('capybara')) {
             this.textures.remove('capybara');
@@ -347,44 +363,44 @@ export class GameScene extends Phaser.Scene {
         // Clear canvas
         ctx.clearRect(0, 0, 60, 80);
         
-        // BODY - Capybaras are very barrel-shaped and chunky
-        this.drawPixelRect(ctx, 12, 30, 40, 30, brown);
+        // BODY - Capybaras are very barrel-shaped and chunky (flipped)
+        this.drawPixelRect(ctx, 8, 30, 40, 30, brown);
         
-        // HEAD - Large, rectangular head characteristic of capybaras
-        this.drawPixelRect(ctx, 8, 18, 28, 18, brown);
+        // HEAD - Large, rectangular head characteristic of capybaras (flipped)
+        this.drawPixelRect(ctx, 24, 18, 28, 18, brown);
         
-        // SNOUT - Capybaras have a very distinctive blunt, square snout
-        this.drawPixelRect(ctx, 4, 22, 8, 10, lightBrown);
+        // SNOUT - Capybaras have a very distinctive blunt, square snout (now on right)
+        this.drawPixelRect(ctx, 48, 22, 8, 10, lightBrown);
         
-        // NOSTRIL - Large, prominent nostril
-        this.drawPixelRect(ctx, 5, 25, 2, 2, black);
+        // NOSTRIL - Large, prominent nostril (flipped)
+        this.drawPixelRect(ctx, 53, 25, 2, 2, black);
         
-        // EYE - Small, placed higher on head
-        this.drawPixelRect(ctx, 18, 20, 3, 3, black);
-        this.drawPixelRect(ctx, 19, 20, 1, 1, lightBrown); // Eye shine
+        // EYE - Small, placed higher on head (flipped)
+        this.drawPixelRect(ctx, 39, 20, 3, 3, black);
+        this.drawPixelRect(ctx, 40, 20, 1, 1, lightBrown); // Eye shine
         
-        // EAR - Small, round ear on top of head
-        this.drawPixelRect(ctx, 22, 16, 6, 6, darkBrown);
-        this.drawPixelRect(ctx, 24, 18, 2, 2, pink);
+        // EAR - Small, round ear on top of head (flipped)
+        this.drawPixelRect(ctx, 32, 16, 6, 6, darkBrown);
+        this.drawPixelRect(ctx, 34, 18, 2, 2, pink);
         
-        // LEGS - Short, stubby legs (capybaras have very short legs)
-        this.drawPixelRect(ctx, 18, 58, 5, 12, darkBrown); // Front leg
-        this.drawPixelRect(ctx, 32, 58, 5, 12, darkBrown); // Back leg
-        this.drawPixelRect(ctx, 26, 58, 4, 12, darkBrown); // Middle leg (partially visible)
+        // LEGS - Short, stubby legs (capybaras have very short legs) (flipped)
+        this.drawPixelRect(ctx, 37, 58, 5, 12, darkBrown); // Front leg (now back)
+        this.drawPixelRect(ctx, 23, 58, 5, 12, darkBrown); // Back leg (now front)
+        this.drawPixelRect(ctx, 30, 58, 4, 12, darkBrown); // Middle leg (partially visible)
         
         // BODY DEFINITION
-        this.drawPixelRect(ctx, 12, 58, 40, 2, darkBrown); // Belly line
-        this.drawPixelRect(ctx, 12, 30, 40, 2, darkBrown); // Back line
+        this.drawPixelRect(ctx, 8, 58, 40, 2, darkBrown); // Belly line
+        this.drawPixelRect(ctx, 8, 30, 40, 2, darkBrown); // Back line
         
-        // FACE DETAILS - Mouth line
-        this.drawPixelRect(ctx, 6, 28, 6, 1, darkBrown);
+        // FACE DETAILS - Mouth line (flipped)
+        this.drawPixelRect(ctx, 48, 28, 6, 1, darkBrown);
         
-        // CHEST/NECK area
-        this.drawPixelRect(ctx, 12, 25, 8, 8, lightBrown);
+        // CHEST/NECK area (flipped)
+        this.drawPixelRect(ctx, 40, 25, 8, 8, lightBrown);
         
-        // Make the body more rounded at the back (capybaras are very round)
-        this.drawPixelRect(ctx, 50, 32, 2, 26, brown);
-        this.drawPixelRect(ctx, 52, 35, 2, 20, lightBrown);
+        // Make the body more rounded at the back (capybaras are very round) (now at front)
+        this.drawPixelRect(ctx, 6, 32, 2, 26, brown);
+        this.drawPixelRect(ctx, 4, 35, 2, 20, lightBrown);
         
         canvas?.refresh();
     }
